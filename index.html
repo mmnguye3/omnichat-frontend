@@ -2517,32 +2517,46 @@
         <!-- Facebook Channel Setup -->
         <div class="card">
           <div class="card-header">
-            <h3><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook Messenger Setup</h3>
+            <h3><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook Messenger</h3>
           </div>
           
-          <div style="background:#f0f9ff;border-radius:8px;padding:16px;margin-bottom:16px;">
-            <h4 style="margin-bottom:8px;">How to connect:</h4>
-            <ol style="font-size:13px;line-height:1.8;padding-left:20px;color:var(--text-secondary);">
-              <li>Go to <a href="https://developers.facebook.com" target="_blank" style="color:var(--primary);">Meta Developers</a></li>
-              <li>Create an app → "Other" → "Business"</li>
-              <li>Add "Messenger" product</li>
-              <li>Connect your Facebook Page</li>
-              <li>Generate <strong>Page Access Token</strong></li>
-              <li>Paste token below</li>
-            </ol>
+          <div style="text-align:center;padding:20px;">
+            <div style="width:80px;height:80px;background:#1877F2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <i class="fab fa-facebook" style="font-size:40px;color:white;"></i>
+            </div>
+            <p style="margin-bottom:20px;color:var(--text-secondary);">Connect your Facebook account to start receiving messages from customers on Messenger.</p>
+            
+            <button class="btn btn-primary" id="connectFacebookBtn" style="background:#1877F2;padding:12px 32px;font-size:16px;">
+              <i class="fab fa-facebook"></i> Connect with Facebook
+            </button>
           </div>
           
-          <div class="form-group">
-            <label>Page Access Token</label>
-            <input type="text" id="fbPageToken" placeholder="Paste your Facebook Page Access Token">
+          <div id="facebookConnected" style="display:none;text-align:center;padding:20px;">
+            <div style="width:80px;height:80px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <i class="fas fa-check" style="font-size:40px;color:white;"></i>
+            </div>
+            <p style="font-weight:600;font-size:18px;margin-bottom:8px;">Connected!</p>
+            <p style="color:var(--text-secondary);" id="fbPageName">My Business Page</p>
+            <button class="btn btn-secondary" style="margin-top:16px;" id="disconnectFacebookBtn">Disconnect</button>
+          </div>
+        </div>
+        
+        <!-- WhatsApp Setup -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp</h3>
           </div>
           
-          <div class="form-group">
-            <label>Page ID</label>
-            <input type="text" id="fbPageId" placeholder="Your Facebook Page ID">
+          <div style="text-align:center;padding:20px;">
+            <div style="width:80px;height:80px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <i class="fab fa-whatsapp" style="font-size:40px;color:white;"></i>
+            </div>
+            <p style="margin-bottom:20px;color:var(--text-secondary);">Connect your WhatsApp Business account to chat with customers.</p>
+            
+            <button class="btn btn-primary" id="connectWhatsAppBtn" style="background:#25D366;padding:12px 32px;font-size:16px;">
+              <i class="fab fa-whatsapp"></i> Connect WhatsApp
+            </button>
           </div>
-          
-          <button class="btn btn-primary" id="saveFacebookToken">Connect Facebook</button>
         </div>
         
         <div class="card">
@@ -3143,6 +3157,39 @@
       } catch (error) {
         alert('❌ Error: ' + error.message);
       }
+    });
+    
+    // Facebook Connect Button (OAuth)
+    document.getElementById('connectFacebookBtn')?.addEventListener('click', async () => {
+      // In production, this would redirect to Facebook OAuth:
+      // const appId = 'YOUR_FB_APP_ID';
+      // const redirectUri = encodeURIComponent(window.location.origin + '/auth/facebook/callback');
+      // window.location.href = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=pages_messaging,pages_show_list`;
+      
+      // Demo mode:
+      const confirmed = confirm('🔗 Facebook Login\n\nIn production, this would open Facebook and ask you to log in and authorize access to your pages.\n\nFor demo, click OK to simulate connection.');
+      if (confirmed) {
+        document.getElementById('connectFacebookBtn').style.display = 'none';
+        document.getElementById('facebookConnected').style.display = 'block';
+        alert('✅ Connected to Facebook!\n\nIn production, this would be a real OAuth login.');
+      }
+    });
+    
+    // Disconnect Facebook
+    document.getElementById('disconnectFacebookBtn')?.addEventListener('click', () => {
+      if (confirm('Disconnect Facebook?')) {
+        document.getElementById('connectFacebookBtn').style.display = 'block';
+        document.getElementById('facebookConnected').style.display = 'none';
+      }
+    });
+    
+    // WhatsApp Connect Button
+    document.getElementById('connectWhatsAppBtn')?.addEventListener('click', async () => {
+      alert('📱 WhatsApp Connection\n\nTo connect WhatsApp, you need:\n\n1. WhatsApp Business API (via Meta)\n2. Or use a provider like Twilio\n\nClick OK to simulate for demo.');
+      
+      // Demo mode
+      document.getElementById('connectWhatsAppBtn').textContent = '✅ Connected';
+      document.getElementById('connectWhatsAppBtn').disabled = true;
     });
     
     // Broadcast modal
