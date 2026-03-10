@@ -2514,6 +2514,37 @@
           <button class="btn btn-primary">Save Changes</button>
         </div>
         
+        <!-- Facebook Channel Setup -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fab fa-facebook" style="color:#1877F2;"></i> Facebook Messenger Setup</h3>
+          </div>
+          
+          <div style="background:#f0f9ff;border-radius:8px;padding:16px;margin-bottom:16px;">
+            <h4 style="margin-bottom:8px;">How to connect:</h4>
+            <ol style="font-size:13px;line-height:1.8;padding-left:20px;color:var(--text-secondary);">
+              <li>Go to <a href="https://developers.facebook.com" target="_blank" style="color:var(--primary);">Meta Developers</a></li>
+              <li>Create an app → "Other" → "Business"</li>
+              <li>Add "Messenger" product</li>
+              <li>Connect your Facebook Page</li>
+              <li>Generate <strong>Page Access Token</strong></li>
+              <li>Paste token below</li>
+            </ol>
+          </div>
+          
+          <div class="form-group">
+            <label>Page Access Token</label>
+            <input type="text" id="fbPageToken" placeholder="Paste your Facebook Page Access Token">
+          </div>
+          
+          <div class="form-group">
+            <label>Page ID</label>
+            <input type="text" id="fbPageId" placeholder="Your Facebook Page ID">
+          </div>
+          
+          <button class="btn btn-primary" id="saveFacebookToken">Connect Facebook</button>
+        </div>
+        
         <div class="card">
           <div class="card-header">
             <h3><i class="fas fa-bell"></i> Notifications</h3>
@@ -3030,6 +3061,87 @@
       const email = prompt('Email:');
       if (name) {
         alert(`Contact "${name}" added! (Demo mode)`);
+      }
+    });
+    
+    // Add team
+    document.getElementById('addTeamBtn')?.addEventListener('click', () => {
+      const name = prompt('Team name:');
+      if (name) {
+        alert(`Team "${name}" created!`);
+      }
+    });
+    
+    // Add canned response
+    document.getElementById('addCannedBtn')?.addEventListener('click', () => {
+      const title = prompt('Response title:');
+      const content = prompt('Response message:');
+      if (title && content) {
+        alert(`Canned response "${title}" saved!`);
+      }
+    });
+    
+    // Sync contacts
+    document.getElementById('syncContactsBtn')?.addEventListener('click', async () => {
+      alert('🔄 Syncing contacts from Facebook...\n\nThis will connect to Facebook API and import all contacts who have messaged your page.');
+    });
+    
+    // Facebook Connect buttons
+    document.querySelectorAll('.connect-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        if (this.textContent.includes('Connect')) {
+          const channel = this.closest('.channel-card').querySelector('h4').textContent;
+          const confirmConnect = confirm(`Connect to ${channel}?\n\nYou'll be redirected to authenticate with Facebook.`);
+          if (confirmConnect) {
+            alert(`📱 Redirecting to Facebook...\n\nIn production, this would open Facebook OAuth.\n\nTo connect now, go to Settings → Channels → Facebook and enter your Page Access Token.`);
+          }
+        }
+      });
+    });
+    
+    // Save Agent
+    document.getElementById('saveAgentBtn')?.addEventListener('click', () => {
+      const name = document.getElementById('agentName').value;
+      const email = document.getElementById('agentEmail').value;
+      const role = document.getElementById('agentRole').value;
+      
+      if (name && email) {
+        alert(`Agent "${name}" added as ${role}!`);
+        closeModal('agentModal');
+        document.getElementById('agentName').value = '';
+        document.getElementById('agentEmail').value = '';
+      }
+    });
+    
+    // Save Facebook Token
+    document.getElementById('saveFacebookToken')?.addEventListener('click', async () => {
+      const pageToken = document.getElementById('fbPageToken').value;
+      const pageId = document.getElementById('fbPageId').value;
+      
+      if (!pageToken || !pageId) {
+        alert('Please enter both Page Access Token and Page ID');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/channels`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Facebook Messenger',
+            type: 'messenger',
+            page_id: pageId,
+            access_token: pageToken
+          })
+        });
+        
+        if (response.ok) {
+          alert('✅ Facebook connected successfully!\n\nYou can now send and receive messages from Facebook Messenger.');
+        } else {
+          alert('❌ Failed to connect. Please check your token.');
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
       }
     });
     
