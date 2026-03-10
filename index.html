@@ -1303,9 +1303,21 @@
       
       <!-- Login Form -->
       <form id="loginForm">
-        <input type="email" class="form-input" placeholder="Email" value="admin@omnichat.com" required>
+        <input type="email" class="form-input" placeholder="Email" value="super@admin.com" required>
         <input type="password" class="form-input" placeholder="Password" value="password" required>
+        
+        <div class="form-group">
+          <label style="font-size:12px;color:var(--text-secondary);">Login as:</label>
+          <select id="loginRole" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-white);color:var(--text);">
+            <option value="super_admin">👑 Super Admin</option>
+            <option value="admin">⚙️ Admin</option>
+            <option value="manager">👨‍💼 Manager</option>
+            <option value="agent">👤 Agent</option>
+          </select>
+        </div>
+        
         <button type="submit" class="login-btn">Sign In</button>
+        <p class="demo-note">Demo: Select a role and click Sign In</p>
       </form>
       
       <!-- Register Form -->
@@ -2771,14 +2783,54 @@
     // API Configuration
     const API_BASE = 'https://omnichat-saas.vercel.app/api';
     
-    // Demo data
-    const DEMO_USER = {
-      id: 1,
-      name: 'Super Admin',
-      email: 'super@admin.com',
-      role: 'super_admin',
-      avatar: 'SA'
+    // Demo users for different roles
+    const DEMO_USERS = {
+      super_admin: { id: 1, name: 'Super Admin', email: 'super@admin.com', role: 'super_admin', avatar: 'SA' },
+      admin: { id: 2, name: 'Admin User', email: 'admin@omnichat.com', role: 'admin', avatar: 'AD' },
+      manager: { id: 3, name: 'Manager', email: 'manager@omnichat.com', role: 'manager', avatar: 'MG' },
+      agent: { id: 4, name: 'Agent', email: 'agent@omnichat.com', role: 'agent', avatar: 'AG' }
     };
+    
+    // Current user
+    let DEMO_USER = DEMO_USERS.super_admin;
+    
+    // Role-based access control
+    function updateUIBasedOnRole() {
+      const role = DEMO_USER.role;
+      
+      // Hide all admin sections first
+      document.getElementById('superAdminSection')?.style?.display = 'none';
+      document.getElementById('allUsersSection')?.style?.display = 'none';
+      
+      // Show/hide based on role
+      if (role === 'super_admin') {
+        // Super Admin: See everything
+        document.getElementById('superAdminSection') && (document.getElementById('superAdminSection').style.display = 'block');
+        document.getElementById('allUsersSection') && (document.getElementById('allUsersSection').style.display = 'block');
+        return;
+      }
+      
+      if (role === 'admin') {
+        // Admin: See settings but not user approvals
+        document.getElementById('allUsersSection') && (document.getElementById('allUsersSection').style.display = 'block');
+      }
+      
+      // Agents and Managers: Hide settings, teams management
+      if (role === 'agent') {
+        // Agent: Only see conversations and contacts
+        document.querySelectorAll('.nav-item[data-panel="settings"]')?.forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav-item[data-panel="teams"]')?.forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav-item[data-panel="agents"]')?.forEach(el => el.style.display = 'none');
+      }
+    }
+    
+    // Switch role (for demo)
+    function switchRole(newRole) {
+      if (DEMO_USERS[newRole]) {
+        DEMO_USER = DEMO_USERS[newRole];
+        location.reload();
+      }
+    }
     
     // Invite codes storage (demo)
     let INVITE_CODES = [
@@ -2821,51 +2873,26 @@
       e.preventDefault();
       const email = loginForm.querySelector('input[type="email"]').value;
       const password = loginForm.querySelector('input[type="password"]').value;
+      const selectedRole = document.getElementById('loginRole').value;
       
-      try {
-        // Call real API
-        const response = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        
-        if (response.ok) {
-          const { user } = await response.json();
-          DEMO_USER.id = user.id;
-          DEMO_USER.email = user.email;
-          DEMO_USER.name = user.full_name;
-          DEMO_USER.role = user.role;
-          DEMO_USER.avatar = user.full_name ? user.full_name.substring(0,2).toUpperCase() : 'US';
-        } else {
-          // Fallback to demo login
-          if (email === 'super@admin.com' && password === 'super123') {
-            DEMO_USER.role = 'super_admin';
-            DEMO_USER.name = 'Super Admin';
-            DEMO_USER.avatar = 'SA';
-          } else if (email === 'admin@omnichat.com' && password === 'password') {
-            DEMO_USER.role = 'admin';
-            DEMO_USER.name = 'Admin User';
-            DEMO_USER.avatar = 'AD';
-          } else {
-            alert('Invalid credentials');
-            return;
-          }
-        }
-      } catch (err) {
-        // Use demo login if API fails
-        if (email === 'super@admin.com' && password === 'super123') {
-          DEMO_USER.role = 'super_admin';
-          DEMO_USER.name = 'Super Admin';
-          DEMO_USER.avatar = 'SA';
-        } else if (email === 'admin@omnichat.com' && password === 'password') {
-          DEMO_USER.role = 'admin';
-          DEMO_USER.name = 'Admin User';
-          DEMO_USER.avatar = 'AD';
-        } else {
-          alert('Invalid credentials. Try: super@admin.com / super123');
-          return;
-        }
+      // Use selected role for demo
+      if (DEMO_USERS[selectedRole]) {
+        DEMO_USER = { ...DEMO_USERS[selectedRole] };
+      }
+      
+      // Update UI
+      document.getElementById('currentUser').textContent = DEMO_USER.name;
+      document.getElementById('currentRole').textContent = DEMO_USER.role === 'super_admin' ? 'Super Admin' : 
+        DEMO_USER.role === 'admin' ? 'Administrator' : 
+        DEMO_USER.role === 'manager' ? 'Manager' : 'Agent';
+      document.querySelector('.user-avatar').textContent = DEMO_USER.avatar;
+      
+      // Apply role-based access
+      updateUIBasedOnRole();
+      
+      loginScreen.style.display = 'none';
+      mainApp.classList.add('active');
+    });
       }
       
       // Update UI
@@ -2873,11 +2900,8 @@
       document.getElementById('currentRole').textContent = DEMO_USER.role === 'super_admin' ? 'Super Admin' : 'Administrator';
       document.querySelector('.user-avatar').textContent = DEMO_USER.avatar;
       
-      // Show super admin sections if super_admin
-      if (DEMO_USER.role === 'super_admin') {
-        document.getElementById('superAdminSection').style.display = 'block';
-        document.getElementById('allUsersSection').style.display = 'block';
-      }
+      // Apply role-based access
+      updateUIBasedOnRole();
       
       loginScreen.style.display = 'none';
       mainApp.classList.add('active');
