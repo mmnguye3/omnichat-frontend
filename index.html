@@ -3023,6 +3023,16 @@
       openModal('agentModal');
     });
     
+    // Add contact modal
+    document.getElementById('addContactBtn').addEventListener('click', () => {
+      const name = prompt('Contact name:');
+      const phone = prompt('Phone number:');
+      const email = prompt('Email:');
+      if (name) {
+        alert(`Contact "${name}" added! (Demo mode)`);
+      }
+    });
+    
     // Broadcast modal
     document.getElementById('newBroadcastBtn').addEventListener('click', () => {
       openModal('broadcastModal');
